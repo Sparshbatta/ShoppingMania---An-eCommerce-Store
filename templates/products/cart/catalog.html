@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+Cart
+{% endblock %}
+{% block content %} 
+<style>
+    .myBtn1{
+        background-image: linear-gradient(100deg,rgba(100, 167, 233, 0.4),rgba(158, 229, 91, 0.9));
+        border-radius: 8px;
+    }
+    .myBtn2{
+        background-image: linear-gradient(100deg,rgba(239, 94, 46, 0.4),rgba(243, 144, 23, 0.9));
+        border-radius: 8px;
+    }
+</style>
+<main class="pt-5">
+    <div class="container">
+        <div class="page-content page-container" id="page-content">
+            <div class="padding">
+                <div class="row container d-flex justify-content-center">
+                    <div class="col-lg-8 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">Shopping Cart</h4>
+                                <p class="card-description"> Your cart items...</p>
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>Item Title</th>
+                                                <th>Price</th>
+                                                <th>Quantity</th>
+                                                <th style="column-width: 100px;">Actions</th>
+                                                <th>Total Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                           
+                                            {% for item in cart %}
+                                            {% with product=item.product%}
+                                            <tr id="header-prod-{{product.id}}">
+                                                <td> <img src="{{product.image.url}}" alt="" height="50px"></td>
+                                                <td><a href="{{product.get_absolute_url}}" style="text-decoration:none;color:black;font-weight:bold">{{product.title}}</a></td>
+                                                <td>${{item.price}}</td>
+
+                                                <td>
+                                                    <select id="select-{{product.id}}">
+                                                        <option selected>{{item.qty}}</option>
+                                                        <option value="1">1</option>
+                                                        <option value="2">2</option>
+                                                        <option value="3">3</option>
+                                                        <option value="4">4</option>
+                                                        <option value="5">5</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <button class="myBtn1" id="update-btn-{{product.id}}"  value="{{product.id}}" onclick="Update(value)">Update</button>
+                                                    <button class="myBtn2" id="delete-btn-{{product.id}}"  value="{{product.id}}" onclick="Delete(value)">Delete</button>
+                                                </td>
+                                                <td id="item-price-{{product.id}}">${{item.total_price}}</td>
+                                            </tr>
+                                            {% endwith %}
+                                            {%endfor%}
+                                        </tbody>
+                                        <thead>
+                                            <tr>
+                                                <th>Subtotal</th>           
+                                                <th></th>           
+                                                <th></th>  
+                                                <th></th>
+                                                <th></th>         
+                                                <th id="subtotal">${{cart.get_subtotal_price}}</th>           
+                                            </tr>
+                                        </thead>
+                                        {% if cart %}
+                                        <thead class="shipping">
+                                            <tr>
+                                                <th>Shipping Cost</th>           
+                                                <th></th>           
+                                                <th></th>  
+                                                <th></th>
+                                                <th></th>         
+                                                <th id="shipping">$11.50</th>           
+                                            </tr>
+                                        </thead>
+                                        {% endif %}
+                                    
+                                {% if cart %}
+                                <div class="container-fluid" >
+                                    <div class="row no-gutter">
+                                        <div class="col-md-12">
+                                            <div class="login align-items-center py-2">
+                                                <div class="container">
+                                                    <div class="row">
+                                                        <div class="col-6 col-md-12">
+                                                                <thead id="grand">
+                                                                    <tr>
+                                                                        <th><span style="font-weight:bolder">Grand Total</span> </th>           
+                                                                        <th></th>           
+                                                                        <th></th>           
+                                                                       <th></th>
+                                                                        <th></th>
+                                                                        <th><span style="font-weight:bolder" id="grand_total">${{cart.get_total_price}}</span></th>
+                                                                    </tr>
+                                                                </thead> 
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </table>
+                        </div>
+                                {% if cart %}
+                                <div class="text-center checkout">
+                                    <a role="button" class="btn btn-primary btn-block py-2 mb-4 mt-5 fw-bold w-100" href="{% url 'payment:paymentCart' %}" style="background-color: rgba(17, 52, 10);border-color: rgba(17, 52, 10);border-radius:8px">Checkout</a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</main>
+
+<script>
+    function Delete(id)
+    {
+    $(document).on('click',`#delete-btn-${id}`,(e)=>{
+        e.preventDefault();
+        $.ajax({
+            type:'POST',
+            url:'{% url "cart:cart_delete" %}',
+            data:{
+                productid:id,
+                productqty:$(`#select-${id} option:selected`).val(),
+                csrfmiddlewaretoken:"{{csrf_token}}",
+                action:'post',
+            },
+            success:(json)=>{
+                document.getElementById('cart-qty').innerHTML = json.qty
+                document.getElementById('subtotal').innerHTML = json.sub_total
+           
+                $(`#header-prod-${id}`).remove()
+                var qty = parseInt(json.qty)
+                if(qty===0)
+                {
+                    $('.checkout').remove()
+                    $('.shipping').remove()
+                    $('#grand').remove()
+                }
+            },
+            error:(xhr,errmsg,err)=>{
+                console.log(xhr)
+                console.log(errmsg)
+                console.log(err)
+            }
+            
+        })
+    })
+}
+
+function Update(id)
+{
+    $(document).on('click',`#update-btn-${id}`,(e)=>{
+        e.preventDefault();
+        $.ajax({
+          type:'POST',
+          url:'{% url "cart:cart_update" %}'  ,
+          data:{
+              productid:id,
+              productqty:$(`#select-${id} option:selected`).val(),
+              csrfmiddlewaretoken:"{{csrf_token}}",
+              action: 'post'
+          },
+          success:(json)=>{
+                document.getElementById('cart-qty').innerHTML = `${json.qty}`
+                document.getElementById('subtotal').innerHTML = '$'+`${json.sub_total}`
+                document.getElementById(`item-price-${id}`).innerHTML = '$'+`${json.new_total_price}`
+                document.getElementById('grand_total').innerHTML = '$'+json.grand_total_price
+          },
+          error:(xhr,errmsg,err)=>{
+
+          }
+        })
+    })
+}
+</script>
+{% endblock %}

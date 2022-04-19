@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Confirm Deletion {% endblock %}
+{% block stylesheet %}
+<link rel="stylesheet" href="{% static 'css/register_styles.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container-fluid m-5 p-2">
+    <div class="row no-gutter">
+        <div class="col-md-12">
+            <div class="login d-flex align-items-center py-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-12 col-lg-6 mx-auto">
+                            <div class="p-4">
+                                <h3 class="mb-4">Account Deleted</h3>
+                                <a href="{% url 'products:home' %}">Redirect to Homepage</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

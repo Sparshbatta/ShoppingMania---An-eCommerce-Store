@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+Login
+{% endblock %}
+{% block stylesheet %}
+<link rel="stylesheet" href="{% static 'css/login_styles.css' %}">
+{% endblock %}
+{% block content %}
+
+<div class="container-fluid mb-5">
+    <div class="row no-gutter">
+        <div class="col-md-12">
+            <div class="login d-flex align-items-center py-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-12 col-lg-6 mx-auto">
+                            <form action="{% url 'account:login' %}" class="account-form p-4" method="post">
+                                {% csrf_token %}
+                                <h3 class="mb-4">Sign In</h3>
+                                {% if form.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    Error: Username or Password not correct!
+                                </div>
+                                {% endif %}
+                                <label class="form-label">{{form.username.label}}</label>
+                                {{form.username}}
+                                <label class="form-label">{{form.password.label}}</label>
+                                {{form.password}}
+                                <div class="d-grid gap-2">
+                                    <input type="hidden" name="next" value="{{next}}">
+                                    <button class="btn btn-primary py-2 mb-4 mt-5 fw-bold" type="submit" value="Login">Login</button>
+                                </div>
+                                <p class="text-center pb-3 mb-5">
+                                    <a href="{% url 'account:register' %}">Create an account</a>
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
